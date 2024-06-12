@@ -1,31 +1,33 @@
-const getTodos = (callback) => {
-  const request = new XMLHttpRequest();
+const getTodos = (resource) => {
+  return new Promise(function (resolve, reject) {
+    const request = new XMLHttpRequest();
 
-  request.addEventListener("readystatechange", () => {
-    //   console.log(request, request.readyState);
-    if (request.readyState === 4 && request.status === 200) {
-      const data = JSON.parse(request.responseText);
-      callback(undefined, data);
-    } else if (request.readyState === 4 && request.status === 404) {
-      callback("Could not fetch the data", undefined);
-    }
+    request.addEventListener("readystatechange", () => {
+      if (request.readyState === 4 && request.status === 200) {
+        const data = JSON.parse(request.responseText);
+        resolve(data);
+      } else if (request.readyState === 4 && request.status === 404) {
+        reject("Error getting resources");
+      }
+    });
+
+    request.open("GET", resource);
+    request.send();
   });
-
-  request.open("GET", "todos.json");
-  request.send();
 };
 
-console.log(1);
-console.log(2);
-
-getTodos((err, data) => {
-  console.log(`callback fired`);
-  if (err) {
-    console.log(err);
-  } else {
-    console.log(data);
-  }
-});
-
-console.log(3);
-console.log(4);
+getTodos("todos/luigi.json")
+  .then((data) => {
+    console.log("Promise 1 resolved:", data);
+    return getTodos("todos/mario.json");
+  })
+  .then((data) => {
+    console.log("Promise 2 resolved:", data);
+    return getTodos("todos/shuans.json");
+  })
+  .then((data) => {
+    console.log("Promise 3 resolved:", data);
+  })
+  .catch((err) => {
+    console.log("promise rejected:", err);
+  });
