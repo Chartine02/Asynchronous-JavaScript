@@ -90,3 +90,88 @@ async function operations() {
     console.log(error);
   }
 }
+
+// /6. Write a JavaScript function that fetches data from multiple APIs concurrently and returns a combined result using Promises and 'Promise.all()'
+
+function fetchData1(url) {
+  return new Promise((resolve) => {
+    fetch(url).then((data) => {
+      if (!data.ok) {
+        throw new Error(`Error fetching data`);
+      } else {
+        data.json();
+      }
+    });
+  });
+}
+
+function fetchMultipleApi(apiUrls) {
+  const promises = apiUrls.map((el) => {
+    fetchData1(el);
+  });
+  return Promise.all(promises);
+}
+
+//usage
+const apiUrls = [
+  "https://jsonplaceholder.typicode.com/posts/4",
+  "https://jsonplaceholder.typicode.com/posts/5",
+  "https://jsonplaceholder.typicode.com/posts/6",
+];
+
+fetchMultipleApi(apiUrls).then(
+  resolve((data) => {
+    console.log(data);
+  }).catch((error) => {
+    console.log(error);
+  })
+);
+
+//7.Write a JavaScript function that fetches data from an API and retries the request a specified number of times if it fails.
+
+function getInfo(url, maxRetries) {
+  return new Promise((resolve, reject) => {
+    let retries = 0;
+    const fetchData = () => {
+      fetch(url)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Error fetching data ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          resolve(data);
+        })
+        .catch((error) => {
+          retries++;
+          if (retries < maxRetries) {
+            console.log(`Failed, Retrying (${retries}/${maxRetries})... `);
+            fetchData();
+          } else {
+            reject(
+              new Error(
+                `Failed after ${maxRetries} retries. Error: ${error.message}`
+              )
+            );
+          }
+        });
+    };
+    fetchData();
+  });
+}
+
+// usage
+const apiUrl = "https://jsonplaceholder.typicode.com/posts";
+console.log("URL-> ", apiUrl);
+const maxRetries = 3;
+
+getInfo(apiUrl, maxRetries)
+  .then((data) => {
+    console.log("Fetched data:", data);
+  })
+  .catch((error) => {
+    console.log("Error:", error.message);
+  });
+
+// 8.
