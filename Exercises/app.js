@@ -174,4 +174,10 @@ getInfo(apiUrl, maxRetries)
     console.log("Error:", error.message);
   });
 
-// 8.
+// 8. Write a JavaScript program to implement a function that executes a given function repeatedly at a fixed interval using 'setInterval()'.
+
+function repeat(fn, time) {
+  const interval = setInterval(() => fn(), time);
+  clearInterval(interval);
+  console.log(`Execution stopped`);
+}

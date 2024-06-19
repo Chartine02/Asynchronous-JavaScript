@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Form</title>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("#myForm");
+        const emailInput = document.querySelector("#email");
+        const passwordInput = document.querySelector("#password");
+        const errorMessage = document.createElement("div");
+        errorMessage.id = "error-message";
+        errorMessage.style.color = "red";
+
+        form.addEventListener("submit", function (event) {
+          let isValid = true;
+
+          if (!emailInput.value.includes("@")) {
+            isValid = false;
+            errorMessage.textContent = "Please enter a valid email address.";
+          }
+
+          if (passwordInput.value.length < 8) {
+            isValid = false;
+            errorMessage.textContent =
+              "Password must be at least 8 characters long.";
+          }
+
+          if (!isValid) {
+            event.preventDefault();
+            document.body.appendChild(errorMessage);
+          } else {
+            document.body.removeChild(errorMessage);
+            alert("Form submitted successfully!");
+          }
+        });
+      });
+
+      $(document).ready(function () {
+        $(".container").hover(
+          function () {
+            $(this).append(
+              "<span class='tooltip'>This is a container element.</span>"
+            );
+          },
+          function () {
+            $(this).find(".tooltip").remove();
+          }
+        );
+      });
+    </script>
+  </head>
+  <body>
+    <h2>Registration Form</h2>
+
+    <form id="myForm">
+      <label for="email">Email:</label><br />
+      <input type="text" id="email" name="email" /><br />
+      <label for="password">Password:</label><br />
+      <input type="password" id="password" name="password" /><br />
+      <input type="checkbox" id="terms" name="terms" value="agree" />
+      <label for="terms"> I agree to the Terms and Conditions</label><br />
+      <input type="submit" value="Submit" />
+    </form>
+  </body>
+</html>
