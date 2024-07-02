@@ -198,16 +198,21 @@ function weatherInfo(url) {
       });
   });
 }
+const countryName = `Rwanda`;
 
-countryInfo("https://restcountries.com/v3.1/name/Rwanda")
+countryInfo(`https://restcountries.com/v3.1/name/${countryName}`)
   .then((response) => {
     // console.log(response[0].latlng);
     const lat = response[0].latlng[0];
     const lng = response[0].latlng[1];
+    console.log(`Country: ${countryName}`);
+    console.log(`Capital: ${response[0].capital}`);
     weatherInfo(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`
     )
-      .then((response) => console.log("Weather data:", response))
+      .then((response) =>
+        console.log("Temperature:", response.current_weather.temperature)
+      )
       .catch((error) => console.log(error));
   })
   .catch((error) => console.log(error));
@@ -216,24 +221,81 @@ countryInfo("https://restcountries.com/v3.1/name/Rwanda")
 // - Users endpoints [`https://jsonplaceholder.typicode.com/users`](https://jsonplaceholder.typicode.com/users)
 // - Todos endpoints [`https://jsonplaceholder.typicode.com/todos`](https://jsonplaceholder.typicode.com/todos) The returned promise should resolve into an array of users, where each user object has a new key `todos`. This key should contain an array of todos that belong to the user, determined by matching the `userId` of the todo with the `id` of the user
 
-async function fetchUsers(urls) {
-  let data = await Promise.all(responses);
-  return new Promise((resolve, reject) => {
-    let responses = urls.map((url) => {
-      fetch(url)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`Failed to fetch data`);
-          }
-          data = res.json();
-          resolve(data);
-        })
-        .then((data) => {
-          return data.capital;
-        })
-        .catch((err) => {
-          reject("Failing to get data");
-        });
+async function fetchUserTodos(url1, url2) {
+  try {
+    const usersResponse = fetch(url1);
+    const todoResponse = fetch(url2);
+    const responses = await Promise.all([usersResponse, todoResponse]);
+
+    const dataPromises = responses.map((response) => response.json());
+
+    const data = await Promise.all(dataPromises);
+
+    const users = data[0];
+    const todos = data[1];
+
+    users.map((user) => {
+      todos.map((todo) => {
+        if ("todo" in user && user.id === todo.userId) {
+          user.todo.push(todo);
+        } else if (user.id === todo.userId) {
+          user.todo = [todo];
+          console.log(user);
+        }
+      });
     });
-  });
+  } catch (error) {
+    console.log(error);
+  }
 }
+
+const url1 = `https://jsonplaceholder.typicode.com/users`;
+const url2 = `https://jsonplaceholder.typicode.com/todos`;
+
+fetchUserTodos(url1, url2);
+
+// You are building a web application that fetches data from multiple APIs to display information about different countries. You need to fetch the country details from one API and the weather information for the capital city from another API.
+
+// **Here are the requirements:**
+
+// - Use the fetch API to get the country details from [https://restcountries.com/v3.1/name/{countryName}](https://restcountries.com/v3.1/name/%7BcountryName%7D).
+// Use the fetch API to get the weather details from https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true.
+// Display the results in the console as follows:
+
+// Country: France
+// Capital: Paris
+// Current Temperature: 18°C
+
+async function getTemperature(country) {
+  // fetch the countries information
+  // fetch the weather info
+  try {
+    const countryName = country;
+    let capital;
+    const response = await fetch(
+      `https://restcountries.com/v3.1/name/${countryName}`
+    );
+    const data = await response.json();
+    console.log(data[0].latlng);
+    capital = data[0].capital;
+    const lat = data[0].latlng[0];
+    const lng = data[0].latlng[1];
+    // console.log(lng);
+    const weather = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`
+    );
+
+    const info = await weather.json();
+    // console.log(info.current_weather.temperature);
+    const temperature = info.current_weather.temperature;
+
+    console.log(`
+        Country : ${country} 
+        Capital: ${capital}
+        Temperature: ${temperature}`);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+getTemperature("France");
